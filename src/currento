@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# ---- Current To ----
+# Simple bash scripts to enhance cd, inspired by zoxide and navita.
+
+
+# -- Check for ct configuration file and dir --
+CTDIR="$HOME/.config/currento"
+CTHIST="$CTDIR/history"
+if [ ! -d "$CTDIR" ]; then
+    mkdir -p $CTDIR &>/dev/null
+    echo "" > $CTHIST &>/dev/null
+fi
+
+
+# -- Link Start --
+function currento() {
+    # Basic
+    CHOICE=$1
+    CURDIR=$(pwd)
+    PRVDIR=$(dirname $CURDIR)
+
+    # Check history list
+    checklists(){
+        if [ -z "$CHOICE" ]; then
+            cd $HOME
+        elif [ "$CHOICE" = .. ]; then
+            cd ..
+        else
+            cd $CHOICE &>/dev/null
+            if [ $? -eq 0 ]; then
+                savetohist
+            else
+                CHECK=$(cat $CTHIST | grep $CHOICE | awk 'NR==1')
+                if [ "$CHECK" ]; then
+                    cd $CHECK
+                else
+                    cd $CHOICE
+                    if [ $? -eq 0 ]; then
+                        savetohist
+                    fi
+                fi
+            fi
+        fi
+    }
+
+    savetohist(){
+        CHECKHISTORYLIST=$(cat $CTHIST | grep $CURDIR/$CHOICE)
+        if [ ! "$CHECKHISTORYLIST" ]; then
+            echo $CURDIR/$CHOICE >> $CTDIR/history
+        fi
+    }
+
+    history(){
+        LIST=$(cat "$CTHIST")
+        echo "$LIST"
+    }
+
+    case $1 in
+        -[hH]|--history) history ;;
+        *) checklists ;;
+    esac
+}
+alias ct=currento
+alias cd=currento
