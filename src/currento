@@ -1,8 +1,6 @@
 #!/bin/bash
-
 # ---- Current To ----
 # Simple bash scripts to enhance cd, inspired by zoxide and navita.
-
 
 # -- Check for ct configuration file and dir --
 CTDIR="$HOME/.config/currento"
@@ -13,7 +11,6 @@ if [ ! -d "$CTDIR" ]; then
     echo "" > $CTHIST &>/dev/null
     echo "" > $CTLDIR &>/dev/null
 fi
-
 
 # -- Link Start --
 function currento() {
@@ -34,9 +31,10 @@ function currento() {
                 savetohist
                 savelastdir
             else
-                CHECK=$(cat $CTHIST | grep $CHOICE | awk 'NR==1')
+                CHECK=$(cat $CTHIST | grep $CHOICE | sort -k1,1nr | awk 'NR==1 {print $2}')
                 if [ "$CHECK" ]; then
                     cd $CHECK
+                    increasenum
                     savelastdir
                 else
                     cd $CHOICE
@@ -49,16 +47,24 @@ function currento() {
         fi
     }
 
-    savelastdir(){
-        if [ $CURDIR != "$HOME" ]; then
-            echo $CURDIR > $CTLDIR
-        fi
-    }
+    increasenum(){
+        FULLNAME=$(cat $CTHIST | grep $CHECK | awk 'NR==1')
+        NUMBER=$(cat $CTHIST | grep $CHECK | awk 'NR==1 {print $1}')
+        NEWNUMBER=$(($NUMBER + 1))
 
+        sed -i "s|${NUMBER}    ${CHECK}|${NEWNUMBER}    ${CHECK}|" $CTHIST
+    }
+    
     savetohist(){
         CHECKHISTORYLIST=$(cat $CTHIST | grep $CURDIR/$CHOICE)
         if [ ! "$CHECKHISTORYLIST" ]; then
-            echo $CURDIR/$CHOICE >> $CTDIR/history
+            echo "1    $CURDIR/$CHOICE" >> $CTHIST
+        fi
+    }
+
+    savelastdir(){
+        if [ $CURDIR != "$HOME" ]; then
+            echo $CURDIR > $CTLDIR
         fi
     }
 
@@ -75,6 +81,10 @@ function currento() {
         echo "$LIST"
     }
 
+    clearhist(){
+        echo "" > $CTHIST
+    }
+
     help(){
         cat <<EOF
 usage: cd <operation> [...]
@@ -84,6 +94,8 @@ operations:
     cd {-h --history}   show list of directory you've visited
     cd {--help}         show this page
 
+    cd {--clearhistory} to clear the history, ofc.
+
 you can also use 'cd -' for cd to the last directory
 EOF
     }
@@ -91,6 +103,7 @@ EOF
     case $1 in
         --help) help ;;
         -[hH]|--history) history ;;
+        --clearhist|--clearhistory|--clear-history) clearhist ;;
         -|-l|-ld|--lastdir|--lastdirectory) lastdir ;;
         *) checklists ;;
     esac
