@@ -50,7 +50,9 @@ function currento() {
     }
 
     savelastdir(){
-        echo $CURDIR > $CTLDIR
+        if [ $CURDIR != "$HOME" ]; then
+            echo $CURDIR > $CTLDIR
+        fi
     }
 
     savetohist(){
@@ -73,7 +75,21 @@ function currento() {
         echo "$LIST"
     }
 
+    help(){
+        cat <<EOF
+usage: cd <operation> [...]
+operations:
+    cd <directory/path> cd into the directory and save to history
+    cd {-l --lastdir}   cd into the last visited directory
+    cd {-h --history}   show list of directory you've visited
+    cd {--help}         show this page
+
+you can also use 'cd -' for cd to the last directory
+EOF
+    }
+
     case $1 in
+        --help) help ;;
         -[hH]|--history) history ;;
         -|-l|-ld|--lastdir|--lastdirectory) lastdir ;;
         *) checklists ;;
