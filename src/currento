@@ -7,9 +7,11 @@
 # -- Check for ct configuration file and dir --
 CTDIR="$HOME/.config/currento"
 CTHIST="$CTDIR/history"
+CTLDIR="$CTDIR/lastdir"
 if [ ! -d "$CTDIR" ]; then
     mkdir -p $CTDIR &>/dev/null
     echo "" > $CTHIST &>/dev/null
+    echo "" > $CTLDIR &>/dev/null
 fi
 
 
@@ -30,6 +32,7 @@ function currento() {
             cd $CHOICE &>/dev/null
             if [ $? -eq 0 ]; then
                 savetohist
+                savelastdir
             else
                 CHECK=$(cat $CTHIST | grep $CHOICE | awk 'NR==1')
                 if [ "$CHECK" ]; then
@@ -38,16 +41,29 @@ function currento() {
                     cd $CHOICE
                     if [ $? -eq 0 ]; then
                         savetohist
+                        savelastdir
                     fi
                 fi
             fi
         fi
     }
 
+    savelastdir(){
+        echo $CURDIR > $CTLDIR
+    }
+
     savetohist(){
         CHECKHISTORYLIST=$(cat $CTHIST | grep $CURDIR/$CHOICE)
         if [ ! "$CHECKHISTORYLIST" ]; then
             echo $CURDIR/$CHOICE >> $CTDIR/history
+        fi
+    }
+
+    lastdir(){
+        LASTDIR=$(cat $CTLDIR)
+        cd $LASTDIR
+        if [ $? -eq 0 ]; then
+            savelastdir
         fi
     }
 
@@ -58,6 +74,7 @@ function currento() {
 
     case $1 in
         -[hH]|--history) history ;;
+        -|-l|-ld|--lastdir|--lastdirectory) lastdir ;;
         *) checklists ;;
     esac
 }
