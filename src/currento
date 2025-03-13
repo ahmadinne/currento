@@ -37,6 +37,7 @@ function currento() {
                 CHECK=$(cat $CTHIST | grep $CHOICE | awk 'NR==1')
                 if [ "$CHECK" ]; then
                     cd $CHECK
+                    savelastdir
                 else
                     cd $CHOICE
                     if [ $? -eq 0 ]; then
