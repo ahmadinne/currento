@@ -28,20 +28,21 @@ function currento() {
         else
             cd $CHOICE &>/dev/null
             if [ $? -eq 0 ]; then
-                savetohist
+                if [[ "$CHOICE" != *"/"* ]]; then CHOICE="${CHOICE}/"; fi
                 savelastdir
+                FILENAME="${CURDIR}/${CHOICE}"
+                CHECK=$(cat $CTHIST | awk '{print $2}' | grep -x $FILENAME)
+                if [ ! "$CHECK" ]; then
+                    savetohist
+                else
+                    increasenum
+                fi
             else
                 CHECK=$(cat $CTHIST | grep $CHOICE | sort -k1,1nr | awk 'NR==1 {print $2}')
                 if [ "$CHECK" ]; then
                     cd $CHECK
-                    increasenum
                     savelastdir
-                else
-                    cd $CHOICE
-                    if [ $? -eq 0 ]; then
-                        savetohist
-                        savelastdir
-                    fi
+                    increasenum
                 fi
             fi
         fi
@@ -49,16 +50,17 @@ function currento() {
 
     increasenum(){
         FULLNAME=$(cat $CTHIST | grep $CHECK | awk 'NR==1')
+        NAME=$(cat $CTHIST | grep $CHECK | awk 'NR==1 {print $2}')
         NUMBER=$(cat $CTHIST | grep $CHECK | awk 'NR==1 {print $1}')
         NEWNUMBER=$(($NUMBER + 1))
 
-        sed -i "s|${NUMBER}    ${CHECK}|${NEWNUMBER}    ${CHECK}|" $CTHIST
+        sed -i "s|${NUMBER}    ${NAME}|${NEWNUMBER}    ${NAME}|" $CTHIST
     }
     
     savetohist(){
-        CHECKHISTORYLIST=$(cat $CTHIST | grep $CURDIR/$CHOICE)
-        if [ ! "$CHECKHISTORYLIST" ]; then
-            echo "1    $CURDIR/$CHOICE" >> $CTHIST
+        CHECKHISTORY=$(cat $CTHIST | awk '{print $2}' | grep -x "$CURDIR/${CHOICE}")
+        if [[ ! "$CHECKHISTORY" ]]; then
+                echo "1    ${CURDIR}/${CHOICE}" >> $CTHIST
         fi
     }
 
@@ -96,7 +98,7 @@ operations:
 
     cd {--clearhistory} to clear the history, ofc.
 
-you can also use 'cd -' for cd to the last directory
+you can also use 'cd -' to go back into the last directory
 EOF
     }
 
