@@ -79,7 +79,7 @@ function currento() {
     }
 
     history(){
-        LIST=$(cat "$CTHIST")
+        LIST=$(cat "$CTHIST" | sort -k1,1nr)
         echo "$LIST"
     }
 
