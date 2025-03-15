@@ -29,7 +29,6 @@ function currento() {
             cd $CHOICE &>/dev/null
             if [ $? -eq 0 ]; then
                 if [[ "$CHOICE" != *"/"* ]]; then CHOICE="${CHOICE}/"; fi
-                savelastdir
                 FILENAME="${CURDIR}/${CHOICE}"
                 CHECK=$(cat $CTHIST | awk '{print $2}' | grep -x $FILENAME)
                 if [ ! "$CHECK" ]; then
@@ -37,12 +36,13 @@ function currento() {
                 else
                     increasenum
                 fi
+                savelastdir
             else
                 CHECK=$(cat $CTHIST | grep $CHOICE | sort -k1,1nr | awk 'NR==1 {print $2}')
                 if [ "$CHECK" ]; then
                     cd $CHECK
-                    savelastdir
                     increasenum
+                    savelastdir
                 fi
             fi
         fi
