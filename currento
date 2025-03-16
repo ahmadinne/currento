@@ -83,6 +83,11 @@ function currento() {
         echo "$LIST"
     }
 
+    lasthis(){
+        LIST=$(cat "$CTLDIR")
+        echo "$LIST"
+    }
+
     clearhist(){
         echo "" > $CTHIST
     }
@@ -104,6 +109,7 @@ EOF
 
     case $1 in
         --help) help ;;
+        -[lL]|--lastdir) lasthis ;;
         -[hH]|--history) history ;;
         --clearhist|--clearhistory|--clear-history) clearhist ;;
         -|-l|-ld|--lastdir|--lastdirectory) lastdir ;;
