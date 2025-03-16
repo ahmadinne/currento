@@ -88,7 +88,7 @@ function currento() {
     }
 
     help(){
-        cat <<EOF
+        command cat <<EOF
 usage: cd <operation> [...]
 operations:
     cd <directory/path> cd into the directory and save to history
